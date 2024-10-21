@@ -89,15 +89,15 @@ export default class Versioning {
   }
 
   /**
-     * Automatically generates a version based on SemVer out of the box.
-     *
-     * The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.
-     *
-     * The latest tag dictates `<major>.<minor>`
-     * The number of merged PRs since that tag dictates `<patch>`.
-     *
-     * @See: https://semver.org/
-     */
+   * Automatically generates a version based on SemVer out of the box.
+   *
+   * The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.
+   *
+   * The latest tag dictates `<major>.<minor>`
+   * The number of merged PRs since that tag dictates `<patch>`.
+   *
+   * @See: https://semver.org/
+   */
   static async generateSemanticVersion() {
     if (await this.isShallow()) {
       await this.fetch();
@@ -135,7 +135,7 @@ export default class Versioning {
    */
   static async getLatestVersionTag() {
     const tags = await this.git(['tag', '--list', '--sort=-v:refname']);
-    const versionTags = tags.split('\n').filter(tag => tag.match(/^v?\d+(\.\d+)*$/));
+    const versionTags = tags.split('\n').filter((tag) => tag.match(/^v?\d+(\.\d+)*$/));
     return versionTags[0] || '0.0.0';
   }
 
@@ -147,8 +147,9 @@ export default class Versioning {
       'log',
       `${tag}..HEAD`,
       '--merges',
-      '--grep', 'Merge pull request',
-      '--format=%H'
+      '--grep',
+      'Merge pull request',
+      '--format=%H',
     ]);
     return mergeCommits.split('\n').filter(Boolean).length;
   }
@@ -157,13 +158,9 @@ export default class Versioning {
    * Get the total number of merged PRs
    */
   static async getNumberOfMergedPRs() {
-    const mergeCommits = await this.git([
-      'log',
-      '--merges',
-      '--grep', 'Merge pull request',
-      '--format=%H'
-    ]);
+    const mergeCommits = await this.git(['log', '--merges', '--grep', 'Merge pull request', '--format=%H']);
     return mergeCommits.split('\n').filter(Boolean).length;
+  }
 
   /**
    * Generate the proper version for unity based on an existing tag.
