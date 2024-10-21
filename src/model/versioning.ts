@@ -89,15 +89,15 @@ export default class Versioning {
   }
 
   /**
-   * Automatically generates a version based on SemVer out of the box.
-   *
-   * The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.
-   *
-   * The latest tag dictates `<major>.<minor>`
-   * The number of commits since that tag dictates`<patch>`.
-   *
-   * @See: https://semver.org/
-   */
+     * Automatically generates a version based on SemVer out of the box.
+     *
+     * The version works as follows: `<major>.<minor>.<patch>` for example `0.1.2`.
+     *
+     * The latest tag dictates `<major>.<minor>`
+     * The number of merged PRs since that tag dictates `<patch>`.
+     *
+     * @See: https://semver.org/
+     */
   static async generateSemanticVersion() {
     if (await this.isShallow()) {
       await this.fetch();
@@ -110,30 +110,60 @@ export default class Versioning {
     }
 
     if (!(await this.hasAnyVersionTags())) {
-      const version = `0.0.${await this.getTotalNumberOfCommits()}`;
+      const version = `0.0.${await this.getNumberOfMergedPRs()}`;
       core.info(`Generated version ${version} (no version tags found).`);
-
       return version;
     }
 
-    const versionDescriptor = await this.parseSemanticVersion();
-    if (versionDescriptor) {
-      const { tag, commits, hash } = versionDescriptor;
+    const latestTag = await this.getLatestVersionTag();
+    const mergedPRs = await this.getNumberOfMergedPRsSinceTag(latestTag);
 
-      // Ensure 3 digits (commits should always be patch level)
-      const [major, minor, patch] = `${tag}.${commits}`.split('.');
-      const threeDigitVersion = /^\d+$/.test(patch) ? `${major}.${minor}.${patch}` : `${major}.0.${minor}`;
+    // Parse the latest tag to get major and minor versions
+    const tagParts = latestTag.replace(/^v/, '').split('.');
+    const major = tagParts[0];
+    const minor = tagParts[1] || '0';
+    const patch = mergedPRs.toString();
 
-      core.info(`Found semantic version ${threeDigitVersion} for ${this.branch}@${hash}`);
-
-      return `${threeDigitVersion}`;
-    }
-
-    const version = `0.0.${await this.getTotalNumberOfCommits()}`;
-    core.info(`Generated version ${version} (semantic version couldn't be determined).`);
+    const version = `${major}.${minor}.${patch}`;
+    core.info(`Generated version ${version} based on tag ${latestTag} and ${mergedPRs} merged PRs.`);
 
     return version;
   }
+
+  /**
+   * Get the latest version tag
+   */
+  static async getLatestVersionTag() {
+    const tags = await this.git(['tag', '--list', '--sort=-v:refname']);
+    const versionTags = tags.split('\n').filter(tag => tag.match(/^v?\d+(\.\d+)*$/));
+    return versionTags[0] || '0.0.0';
+  }
+
+  /**
+   * Get the number of merged PRs since the given tag
+   */
+  static async getNumberOfMergedPRsSinceTag(tag: string) {
+    const mergeCommits = await this.git([
+      'log',
+      `${tag}..HEAD`,
+      '--merges',
+      '--grep', 'Merge pull request',
+      '--format=%H'
+    ]);
+    return mergeCommits.split('\n').filter(Boolean).length;
+  }
+
+  /**
+   * Get the total number of merged PRs
+   */
+  static async getNumberOfMergedPRs() {
+    const mergeCommits = await this.git([
+      'log',
+      '--merges',
+      '--grep', 'Merge pull request',
+      '--format=%H'
+    ]);
+    return mergeCommits.split('\n').filter(Boolean).length;
 
   /**
    * Generate the proper version for unity based on an existing tag.
