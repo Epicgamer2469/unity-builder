@@ -122,7 +122,7 @@ export default class Versioning {
     const tagParts = latestTag.replace(/^v/, '').split('.');
     const major = tagParts[0];
     const minor = tagParts[1] || '0';
-    const patch = mergedPRs.toString();
+    const patch = Number.parseInt(tagParts[2] || '0') + mergedPRs;
 
     const version = `${major}.${minor}.${patch}`;
     core.info(`Generated version ${version} based on tag ${latestTag} and ${mergedPRs} merged PRs.`);
