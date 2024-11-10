@@ -166,7 +166,7 @@ export default class Versioning {
    * Generate the proper version for unity based on an existing tag.
    */
   static async generateTagVersion() {
-    let tag = await this.getTag();
+    let tag = await this.getLatestVersionTag();
 
     if (tag.charAt(0) === 'v') {
       tag = tag.slice(1);
