@@ -136,6 +136,8 @@ export default class Versioning {
    */
   static async getLatestVersionTag() {
     const tags = await this.git(['tag', '--list', '--sort=-v:refname']);
+    const tagsu = await this.git(['tag', '--list']);
+    core.info(`Found version tags: tagsu: ${tagsu}`);
     const versionTags = tags.split('\n');
     core.info(`Found version tags: ${versionTags.join(', ')} (latest first) version tag: ${versionTags[0]}`);
     return versionTags[0] || '0.0.0';
@@ -173,6 +175,7 @@ export default class Versioning {
     if (tag.charAt(0) === 'v') {
       tag = tag.slice(1);
     }
+    core.info(`tst version ${this.generateSemanticVersion()}.`);
 
     core.info(`Generated version ${tag}.`);
 
