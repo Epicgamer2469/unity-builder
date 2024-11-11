@@ -136,10 +136,7 @@ export default class Versioning {
    */
   static async getLatestVersionTag() {
     const tags = await this.git(['tag', '--list', '--sort=-v:refname']);
-    const tagsu = await this.git(['tag', '--list']);
-    core.info(`Found version tags: tagsu: ${tagsu}`);
     const versionTags = tags.split('\n');
-    core.info(`Found version tags: ${versionTags.join(', ')} (latest first) version tag: ${versionTags[0]}`);
     return versionTags[0] || '0.0.0';
   }
 
@@ -170,14 +167,27 @@ export default class Versioning {
    * Generate the proper version for unity based on an existing tag.
    */
   static async generateTagVersion() {
+    if (await this.isShallow()) {
+      await this.fetch();
+    }
+
+    await this.logDiff();
+
+    if ((await this.isDirty()) && !Input.allowDirtyBuild) {
+      throw new Error('Branch is dirty. Refusing to base semantic version on uncommitted changes');
+    }
+    
+    if (!(await this.hasAnyVersionTags())) {
+      const version = `0.0.${await this.getNumberOfMergedPRs()}`;
+      core.info(`Generated version ${version} (no version tags found).`);
+      return version;
+    }
+
     let tag = await this.getLatestVersionTag();
 
     if (tag.charAt(0) === 'v') {
       tag = tag.slice(1);
     }
-    core.info(`tst version ${this.generateSemanticVersion()}.`);
-
-    core.info(`Generated version ${tag}.`);
 
     return tag;
   }
