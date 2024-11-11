@@ -82,6 +82,7 @@ export default class Versioning {
       case this.strategies.Semantic:
         return await this.generateSemanticVersion();
       case this.strategies.Tag:
+        core.info('!!! Generating version based on Tag.');
         return await this.generateTagVersion();
       default:
         throw new NotImplementedException(`Strategy ${strategy} is not implemented.`);
@@ -171,6 +172,8 @@ export default class Versioning {
     if (tag.charAt(0) === 'v') {
       tag = tag.slice(1);
     }
+
+    core.info(`Generated version ${tag}.`);
 
     return tag;
   }
