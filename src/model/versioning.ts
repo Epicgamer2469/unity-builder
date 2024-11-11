@@ -136,7 +136,7 @@ export default class Versioning {
    */
   static async getLatestVersionTag() {
     const tags = await this.git(['tag', '--list', '--sort=-v:refname']);
-    const versionTags = tags.split('\n').filter((tag) => tag.match(/^v?\d+(\.\d+)*$/));
+    const versionTags = tags.split('\n');
     core.info(`Found version tags: ${versionTags.join(', ')} (latest first) version tag: ${versionTags[0]}`);
     return versionTags[0] || '0.0.0';
   }
