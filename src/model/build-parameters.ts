@@ -26,6 +26,7 @@ class BuildParameters {
   public runnerTempPath!: string;
   public targetPlatform!: string;
   public projectPath!: string;
+  public buildProfile!: string;
   public buildName!: string;
   public buildPath!: string;
   public buildFile!: string;
@@ -58,6 +59,7 @@ class BuildParameters {
   public kubeConfig!: string;
   public containerMemory!: string;
   public containerCpu!: string;
+  public containerNamespace!: string;
   public kubeVolumeSize!: string;
   public kubeVolume!: string;
   public kubeStorageClass!: string;
@@ -152,6 +154,7 @@ class BuildParameters {
       runnerTempPath: Input.runnerTempPath,
       targetPlatform: Input.targetPlatform,
       projectPath: Input.projectPath,
+      buildProfile: Input.buildProfile,
       buildName: Input.buildName,
       buildPath: `${Input.buildsPath}/${Input.targetPlatform}`,
       buildFile,
@@ -185,6 +188,7 @@ class BuildParameters {
       kubeConfig: CloudRunnerOptions.kubeConfig,
       containerMemory: CloudRunnerOptions.containerMemory,
       containerCpu: CloudRunnerOptions.containerCpu,
+      containerNamespace: CloudRunnerOptions.containerNamespace,
       kubeVolumeSize: CloudRunnerOptions.kubeVolumeSize,
       kubeVolume: CloudRunnerOptions.kubeVolume,
       postBuildContainerHooks: CloudRunnerOptions.postBuildContainerHooks,
